@@ -1,0 +1,42 @@
+name: Send deployment status to Slack
+
+on:
+  workflow_call:
+    inputs:
+      status: 
+        description: 'Job status indicator'
+        required: true
+        type: string
+      domainName:
+        description: 'Domain name in related to deployment'
+        required: true
+        type: string
+    secrets:
+      slackWebhook:
+        description: 'Webhook use for Slack notification'
+        required: true
+
+jobs:
+  Slack-Notification:
+    name: Send message to Slack channel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send deployment status to Slack
+        uses: slackapi/slack-github-action@v1.18.0
+        with:
+          payload: |
+            {
+              "text": "[${{ github.ref_name }} #${{ github.run_number }}] Deployment status to *${{ inputs.domainName }}*: *${{ inputs.status }}*",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "[${{ github.ref_name }} #${{ github.run_number }}] Deployment status to *${{ inputs.domainName }}*: *${{ inputs.status }}*"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.slackWebhook }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
